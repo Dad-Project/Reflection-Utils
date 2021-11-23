@@ -15,6 +15,22 @@ import java.util.Objects;
 import fr.rowlaxx.utils.generic.destination.DestinationResolverException;
 
 //TODO Proposer une instance de classe qui mémorise les bouds pour accélérer les prochaines résolutions.
+/**
+ * Resolve the TypeVariables raw's type from a GenericDeclaration (Class, Method, Constructor)
+ * Raw Types means that the Type will be converted to a Class object
+ * Current Type are supported
+ * - ParameterizedType
+ * - TypeVariable
+ * - WildcardType
+ * - GenericArrayType
+ * 
+ * This class, when processing, will not only resolve the declared TypeVariable from a GenericDeclaration, but also every TypeVariable referenced by each TypeVariable
+ * 
+ * This class also support inherited TypeVariable
+ * @version 2021-11-23
+ * @author Theo
+ * @since 1.0.0
+ */
 public final class BoundsResolver {
 
 	public final static Map<TypeVariable<?>, Class<?>[]> resolve(GenericDeclaration genericDeclaration){
