@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>fr.rowlaxx</groupId>
-	<artifactId>genericutils</artifactId>
+	<artifactId>reflection-utils</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
