@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import fr.rowlaxx.utils.generic.destination.DestinationResolverException;
-
 //TODO Proposer une instance de classe qui mémorise les bouds pour accélérer les prochaines résolutions.
 /**
  * Resolve the TypeVariables raw's type from a GenericDeclaration (Class, Method, Constructor)
@@ -73,7 +71,8 @@ public final class BoundsResolver {
 			if (isResolved())
 				return;
 
-			boolean solvedOne, success;
+			boolean solvedOne;//Stack overflow protection
+			boolean success;
 			TypeVariable<?> typeVariable;
 
 			while (!isResolved()) {
@@ -122,7 +121,7 @@ public final class BoundsResolver {
 					}
 				}
 				else
-					throw new DestinationResolverException("Unknow type : " + bound.getClass() );
+					throw new BoundsResolverException("Unknow type : " + bound.getClass() );
 			}
 
 			final Class<?>[] result = rawBounds.toArray(new Class<?>[rawBounds.size()]);
@@ -141,7 +140,7 @@ public final class BoundsResolver {
 			else if (type instanceof GenericArrayType)
 				findPotential((GenericArrayType)type);
 			else if (!(type instanceof Class) )
-				throw new DestinationResolverException("Unknow type : " + type.getClass() );
+				throw new BoundsResolverException("Unknow type : " + type.getClass() );
 		}
 		
 		private void findPotential(ParameterizedType type) {
