@@ -14,15 +14,16 @@ import java.util.Objects;
 
 import fr.rowlaxx.utils.generic.destination.DestinationResolverException;
 
-public class BoundsResolver {
+//TODO Proposer une instance de classe qui mémorise les bouds pour accélérer les prochaines résolutions.
+public final class BoundsResolver {
 
-	public static Map<TypeVariable<?>, Class<?>[]> resolve(GenericDeclaration genericDeclaration){
+	public final static Map<TypeVariable<?>, Class<?>[]> resolve(GenericDeclaration genericDeclaration){
 		final Instance instance = new Instance(genericDeclaration);
 		instance.resolve();
 		return instance.getResult();
 	}
 
-	private static class Instance {
+	private final static class Instance {
 
 		//Variables
 		private final Map<TypeVariable<?>, Class<?>[]> resolved;
@@ -51,8 +52,8 @@ public class BoundsResolver {
 			return this.resolved;
 		}
 
-		//Methodes solving
-		public synchronized void resolve() {
+		//Methodes resolve
+		private void resolve() {
 			if (isResolved())
 				return;
 
@@ -87,9 +88,7 @@ public class BoundsResolver {
 			final Type[] bounds = typeVariable.getBounds();
 			final ArrayList<Class<?>> rawBounds = new ArrayList<>(bounds.length);
 
-			System.out.println("Precessing " + typeVariable);
 			for (Type bound : bounds) {
-				System.out.println("\t" + bound);
 				if (bound instanceof Class)
 					rawBounds.add((Class<?>)bound);
 				else if (bound instanceof ParameterizedType) {
@@ -111,11 +110,11 @@ public class BoundsResolver {
 			}
 
 			final Class<?>[] result = rawBounds.toArray(new Class<?>[rawBounds.size()]);
-			System.out.println("Resolved " + typeVariable);
 			resolved.put(typeVariable, result);
 			return true;
 		}	
 		
+		//Methodes find potential
 		private void findPotential_Index(Type type) {
 			if (type instanceof ParameterizedType)
 				findPotential((ParameterizedType)type);
@@ -130,21 +129,16 @@ public class BoundsResolver {
 		}
 		
 		private void findPotential(ParameterizedType type) {
-			System.out.println("\t\tChecking ParameterizedType " + type);
 			for (Type t : type.getActualTypeArguments())
 				findPotential_Index(t);
 		}
 		
 		private void findPotential(TypeVariable<?> type) {
-			System.out.println("\t\tChecking TypeVariable " + type);
-			if (!unresolved.contains(type)) {
-				System.out.println("\t\t\tNeed to be resolved.");
+			if (!unresolved.contains(type))
 				unresolved.add((TypeVariable<?>) type);
-			}
 		}
 		
 		private void findPotential(WildcardType type) {
-			System.out.println("\t\tChecking WildcardType " + type);
 			for (Type t : type.getLowerBounds())
 				findPotential_Index(t);
 			for (Type t : type.getUpperBounds())
@@ -152,7 +146,6 @@ public class BoundsResolver {
 		}
 		
 		private void findPotential(GenericArrayType type) {
-			System.out.println("\t\tChecking GenericArrayType " + type);
 			findPotential_Index(type.getGenericComponentType());
 		}
 	}
