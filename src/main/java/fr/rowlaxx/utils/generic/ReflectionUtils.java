@@ -79,9 +79,21 @@ public class ReflectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T tryGet(Field field, Object accessor) {
 		try {
+			field.setAccessible(true);
 			return (T) field.get(accessor);
 		}catch(IllegalAccessException e) {
+			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	public static void trySet(Field field, Object accessor, Object value) {
+		field.setAccessible(true);
+		try {
+			field.set(accessor, value);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return;
 		}
 	}
 	
