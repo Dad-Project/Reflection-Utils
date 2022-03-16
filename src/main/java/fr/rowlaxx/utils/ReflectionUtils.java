@@ -1,4 +1,4 @@
-package fr.rowlaxx.utils.generic;
+package fr.rowlaxx.utils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -93,7 +93,6 @@ public class ReflectionUtils {
 			field.set(accessor, value);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
-			return;
 		}
 	}
 	
