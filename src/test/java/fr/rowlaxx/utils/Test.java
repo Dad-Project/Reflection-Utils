@@ -6,7 +6,7 @@ public class Test {
 
 	public static void main(String[] args) {
 
-		Class<?> c = GenericUtils.resolve(TestObject.class.getTypeParameters()[0], TestObject.De.class);
+		Class<?> c = GenericUtils.resolveClass(TestObject.class.getTypeParameters()[0], TestObject.De.class);
 
 		System.out.println(c);
 	}

@@ -40,54 +40,53 @@ public class GenericUtils {
 	}
 	
 	private static Type resolveRec(Type type, Class<?> clazz) {
+		Objects.requireNonNull(type, "type may not be null.");
+		
+		//////////////////////////////////////////////////////////////////
 		if (type instanceof Class || type instanceof ParameterizedClass)
 			return type;
-		
-		TypeVariable<?>[] typevariables;
-		Type[] generic;
-		Type superclass;
-		
-		Class<?> temp = clazz;
-		while (temp != Object.class) {
-			
-			superclass = temp.getGenericSuperclass();
-			
-			if (superclass instanceof ParameterizedType)
-			{
-				generic = ((ParameterizedType) superclass).getActualTypeArguments();
-				typevariables = ((Class<?>)((ParameterizedType) superclass).getRawType()).getTypeParameters();
-				
-				for (int i = 0 ; i < generic.length ; i++)
-					if (typevariables[i] == type) {
-						//////////////////////////////////////////////////////////////////
-						if (generic[i] instanceof TypeVariable)
-							return resolveRec((TypeVariable<?>)generic[i], clazz);
-						//////////////////////////////////////////////////////////////////
-						else if (generic[i] instanceof Class)
-							return generic[i];
-						//////////////////////////////////////////////////////////////////
-						else if (generic[i] instanceof ParameterizedType) {
-							final Class<?> raw = (Class<?>) ((ParameterizedType)generic[i]).getRawType();
-							final Type[] typeArgs = ((ParameterizedType)generic[i]).getActualTypeArguments();
-							for (int j = 0 ; j < typeArgs.length ; j++)
-								typeArgs[j] = resolveRec(typeArgs[j], clazz);
-							return ParameterizedClass.from(raw, typeArgs);
-						}
-						//////////////////////////////////////////////////////////////////
-						else if (generic[i] instanceof GenericArrayType)
-							return Object[].class;
-						//////////////////////////////////////////////////////////////////
-						else if (generic[i] instanceof WildcardType)
-							return Object.class;
-						//////////////////////////////////////////////////////////////////
-						else
-							throw new GenericUtilsException("Type not supported : " + generic[i].getClass());
-					}
-			}
-						
-			temp = temp.getSuperclass();
+		//////////////////////////////////////////////////////////////////
+		else if (type instanceof WildcardType)
+			return Object.class;
+		//////////////////////////////////////////////////////////////////
+		else if (type instanceof GenericArrayType)
+			return Object[].class;
+		//////////////////////////////////////////////////////////////////
+		else if (type instanceof ParameterizedType) {
+			final Class<?> raw = (Class<?>) ((ParameterizedType)type).getRawType();
+			final Type[] typeArgs = ((ParameterizedType)type).getActualTypeArguments();
+			for (int j = 0 ; j < typeArgs.length ; j++)
+				typeArgs[j] = resolveRec(typeArgs[j], clazz);
+			return ParameterizedClass.from(raw, typeArgs);
 		}
+		//////////////////////////////////////////////////////////////////
+		else if (type instanceof TypeVariable) {
+			TypeVariable<?>[] typevariables;
+			Type[] generic;
+			Type superclass;
+			
+			Class<?> temp = clazz;
+			while (temp != Object.class) {
+				
+				superclass = temp.getGenericSuperclass();
+				
+				if (superclass instanceof ParameterizedType)
+				{
+					generic = ((ParameterizedType) superclass).getActualTypeArguments();
+					typevariables = ((Class<?>)((ParameterizedType) superclass).getRawType()).getTypeParameters();
+					
+					for (int i = 0 ; i < generic.length ; i++)
+						if (typevariables[i] == type)
+							return resolveRec(generic[i], clazz);
+				}
+							
+				temp = temp.getSuperclass();
+			}
+			throw new GenericUtilsException("Unable to resolve type " + type + " with class " + clazz);
+		}
+		//////////////////////////////////////////////////////////////////
+		else
+			throw new GenericUtilsException("Type not supported : " + type.getClass());
 		
-		throw new GenericUtilsException("Unable to resolve type " + type + " with class " + clazz);
 	}
 }
