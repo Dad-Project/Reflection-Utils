@@ -10,27 +10,39 @@ import java.util.Objects;
 
 public class GenericUtils {
 	
-	private static final HashMap<TypeVariable<?>, HashMap<Class<?>, Class<?>>> resolved = new HashMap<>();
+	private static final HashMap<TypeVariable<?>, HashMap<Class<?>, Type>> resolved = new HashMap<>();
 	
-	public static Class<?> resolve(TypeVariable<?> typeVariable, Class<?> clazz){
+	public static Class<?> resolveClass(TypeVariable<?> typeVariable, Class<?> clazz){
+		Type result = resolve(typeVariable, clazz);
+		if (result instanceof Class)
+			return (Class<?>)result;
+		if (result instanceof ParameterizedClass)
+			return ((ParameterizedClass) result).getRawType();
+		throw new GenericUtilsException("Unknow type.");
+	}
+	
+	public static Type resolve(TypeVariable<?> typeVariable, Class<?> clazz){
 		Objects.requireNonNull(typeVariable, "typeVariable may not be null.");
 		Objects.requireNonNull(clazz, "clazz may not be null.");
 		
-		HashMap<Class<?>, Class<?>> map = resolved.get(typeVariable);
+		HashMap<Class<?>, Type> map = resolved.get(typeVariable);
+		Type type;
 		if (map != null) {
-			Class<?> c = map.get(clazz);
-			if (c != null)
-				return c;
+			if ( (type = map.get(clazz)) != null)
+				return type;
 		}
 		else
 			resolved.put(typeVariable, map = new HashMap<>());
 		
-		Class<?> resolved = resolveRec(typeVariable, clazz);
+		final Type resolved = resolveRec(typeVariable, clazz);
 		map.put(clazz, resolved);
 		return resolved;
 	}
 	
-	private static Class<?> resolveRec(Type type, Class<?> clazz) {
+	private static Type resolveRec(Type type, Class<?> clazz) {
+		if (type instanceof Class || type instanceof ParameterizedClass)
+			return type;
+		
 		TypeVariable<?>[] typevariables;
 		Type[] generic;
 		Type superclass;
@@ -47,20 +59,30 @@ public class GenericUtils {
 				
 				for (int i = 0 ; i < generic.length ; i++)
 					if (typevariables[i] == type) {
+						//////////////////////////////////////////////////////////////////
 						if (generic[i] instanceof TypeVariable)
 							return resolveRec((TypeVariable<?>)generic[i], clazz);
+						//////////////////////////////////////////////////////////////////
 						else if (generic[i] instanceof Class)
-							return (Class<?>)generic[i];
-						else if (generic[i] instanceof ParameterizedType)
-							return (Class<?>)((ParameterizedType) generic[i]).getRawType();
+							return generic[i];
+						//////////////////////////////////////////////////////////////////
+						else if (generic[i] instanceof ParameterizedType) {
+							final Class<?> raw = (Class<?>) ((ParameterizedType)generic[i]).getRawType();
+							final Type[] typeArgs = ((ParameterizedType)generic[i]).getActualTypeArguments();
+							for (int j = 0 ; j < typeArgs.length ; j++)
+								typeArgs[j] = resolveRec(typeArgs[j], clazz);
+							return ParameterizedClass.from(raw, typeArgs);
+						}
+						//////////////////////////////////////////////////////////////////
 						else if (generic[i] instanceof GenericArrayType)
-							return resolveRec(((GenericArrayType)generic[i]).getGenericComponentType(), clazz);
+							return Object[].class;
+						//////////////////////////////////////////////////////////////////
 						else if (generic[i] instanceof WildcardType)
 							return Object.class;
+						//////////////////////////////////////////////////////////////////
 						else
 							throw new GenericUtilsException("Type not supported : " + generic[i].getClass());
 					}
-				
 			}
 						
 			temp = temp.getSuperclass();
@@ -68,6 +90,4 @@ public class GenericUtils {
 		
 		throw new GenericUtilsException("Unable to resolve type " + type + " with class " + clazz);
 	}
-	
-
 }

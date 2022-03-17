@@ -1,10 +1,5 @@
 package fr.rowlaxx.utils;
 
-import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import fr.rowlaxx.utils.GenericUtils;
 
 public class Test {
