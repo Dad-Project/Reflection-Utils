@@ -10,9 +10,9 @@ import java.util.Objects;
 
 public class GenericUtils {
 	
-	private static final HashMap<TypeVariable<?>, HashMap<Class<?>, Type>> resolved = new HashMap<>();
+	private static final HashMap<Type, HashMap<Class<?>, Type>> resolved = new HashMap<>();
 	
-	public static Class<?> resolveClass(TypeVariable<?> typeVariable, Class<?> clazz){
+	public static Class<?> resolveClass(Type typeVariable, Class<?> clazz){
 		Type result = resolve(typeVariable, clazz);
 		if (result instanceof Class)
 			return (Class<?>)result;
@@ -21,7 +21,7 @@ public class GenericUtils {
 		throw new GenericUtilsException("Unknow type.");
 	}
 	
-	public static Type resolve(TypeVariable<?> typeVariable, Class<?> clazz){
+	public static Type resolve(Type typeVariable, Class<?> clazz){
 		Objects.requireNonNull(typeVariable, "typeVariable may not be null.");
 		Objects.requireNonNull(clazz, "clazz may not be null.");
 		
