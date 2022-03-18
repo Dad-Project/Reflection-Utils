@@ -1,7 +1,5 @@
 package fr.rowlaxx.utils;
 
-import fr.rowlaxx.utils.GenericUtils;
-
 public class Test {
 
 	public static void main(String[] args) {

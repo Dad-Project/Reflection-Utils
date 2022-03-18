@@ -19,6 +19,46 @@ public class ParameterizedClass implements ParameterizedType {
 		return new ParameterizedClass(raw, typeArgs);
 	}
 	
+	public static ParameterizedClass from(String str) throws ClassNotFoundException {
+		str = str.trim();
+		
+		String firstPart = str.substring(0, str.indexOf('<')).trim();
+		String lastPart = str.substring(str.indexOf('<')+1, str.indexOf('>')).trim();
+	
+		Class<?> rawType = Class.forName(firstPart);
+		Type[] types = new Type[rawType.getTypeParameters().length];
+		
+		int index = 0, lastIndex;
+		String part;
+		for (int i = 0 ; i < types.length ; i++) {
+			lastIndex = next(lastPart, index);
+			part = lastPart.substring(index, lastIndex);
+			types[i] = typeFrom(part);
+			index = lastIndex;
+		}
+		
+		return from(rawType, types);
+	}
+	
+	private static int next(String str, int index) {
+		int count = 0;
+		for (int i = index + 1 ; i < str.length() ; i++) {
+			if (str.charAt(i) == '<')
+				count++;
+			else if (str.charAt(i)== '>')
+				count--;
+			if (count == 0 && str.charAt(i) == ',')
+				return i;
+		}
+		return -1;
+	}
+	
+	private static Type typeFrom(String str) throws ClassNotFoundException {
+		if (str.indexOf('<') == -1)
+			return Class.forName(str);
+		return from(str);
+	}
+	
 	//Variables
 	private final Class<?> rawClass;
 	private final Type[] typeArguments;
@@ -72,5 +112,41 @@ public class ParameterizedClass implements ParameterizedType {
 	public Class<?> getRawType() {
 		return rawClass;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(typeArguments);
+		result = prime * result + Objects.hash(rawClass);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ParameterizedClass other = (ParameterizedClass) obj;
+		return Objects.equals(rawClass, other.rawClass) && Arrays.equals(typeArguments, other.typeArguments);
+	}
 	
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder(128);
+		sb.append(rawClass.getName());
+		sb.append('<');
+		for(int i = 0 ; i < typeArguments.length ; i++) {
+			if (typeArguments[i] instanceof Class)
+				sb.append(((Class<?>)typeArguments[i]).getName());
+			else
+				sb.append(((ParameterizedClass)typeArguments[i]).toString());
+			sb.append(", ");
+		}
+		sb.replace(sb.length() - 2, sb.length(), ">");
+		return sb.toString();
+	}
 }
