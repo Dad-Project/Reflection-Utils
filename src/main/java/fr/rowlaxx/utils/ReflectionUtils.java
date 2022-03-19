@@ -96,6 +96,17 @@ public class ReflectionUtils {
 		}
 	}
 	
+	public static Field getField(String name, Class<?> clazz) throws NoSuchFieldException {
+		while (clazz != null)
+			try {
+				return clazz.getDeclaredField(name);
+			}catch(NoSuchFieldException e) {
+				clazz = clazz.getSuperclass();
+			}
+		
+		throw new NoSuchFieldException("No field " + name + " in class " + clazz);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <T> T tryInstanciate(Class<T> clazz, Object... params) {
 		for (Constructor<?> constructor : clazz.getConstructors()) {

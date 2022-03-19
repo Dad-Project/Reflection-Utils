@@ -64,7 +64,7 @@ public class ParameterizedClass implements ParameterizedType {
 	private final Type[] typeArguments;
 
 	//Constructeurs
-	private ParameterizedClass(Class<?> rawClass, Type[] array) {
+	protected ParameterizedClass(Class<?> rawClass, Type[] array) {
 		Objects.requireNonNull(rawClass, "rawClass may not be null.");
 		
 		final TypeVariable<?>[] typeVariables = rawClass.getTypeParameters();

@@ -1,6 +1,7 @@
 package fr.rowlaxx.utils;
 
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -19,6 +20,14 @@ public class GenericUtils {
 		if (result instanceof ParameterizedClass)
 			return ((ParameterizedClass) result).getRawType();
 		throw new GenericUtilsException("Unknow type.");
+	}
+	
+	public static Type resolveReturnType(Method method, Class<?> clazz) {
+		return resolve(method.getGenericReturnType(), clazz);
+	}
+	
+	public static Type resolveReturnType(Method method) {
+		return resolve(method.getGenericReturnType(), method.getDeclaringClass());
 	}
 	
 	public static Type resolve(Type typeVariable, Class<?> clazz){
