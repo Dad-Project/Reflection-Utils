@@ -111,7 +111,7 @@ public class ReflectionUtils {
 			} catch (IllegalArgumentException e) {
 				continue;
 			} catch (InvocationTargetException e) {
-				continue;
+				throw new ReflectionUtilsException(e.getCause().getMessage());
 			}
 		}
 		return null;
