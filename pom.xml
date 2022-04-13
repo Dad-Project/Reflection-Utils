@@ -20,7 +20,7 @@
 	<distributionManagement>
 		<repository>
 			<id>localrepo</id>
-			<url>http://box.dad-project.com/#/releases</url>
+			<url>http://box.dad-project.com:8080/#/releases</url>
 		</repository>
 	</distributionManagement>
 
