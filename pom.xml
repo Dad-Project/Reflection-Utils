@@ -17,4 +17,11 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>localrepo</id>
+			<url>http://box.dad-project.com/#/releases</url>
+		</repository>
+	</distributionManagement>
+
 </project>
