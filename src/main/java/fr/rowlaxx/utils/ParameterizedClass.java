@@ -75,11 +75,13 @@ public class ParameterizedClass implements ParameterizedType {
 			throw new IllegalArgumentException("array must have the same length as the number of type variables.");
 		
 		this.typeArguments = new Type[typeVariables.length];
-		this.rawClass = rawClass;
+		this.rawClass = ReflectionUtils.toWrapper(rawClass);
 		
 		for (int i = 0 ; i < array.length ; i++) {
 			Objects.requireNonNull(array[i], "the element " + i + " of the array is null.");
-			if (array[i] instanceof Class || array[i] instanceof ParameterizedClass)
+			if (array[i] instanceof Class)
+				this.typeArguments[i] = ReflectionUtils.toWrapper( (Class<?>) array[i]);
+			else if (array[i] instanceof ParameterizedClass)
 				this.typeArguments[i] = array[i];
 			else if (array[i] instanceof ParameterizedType)
 				this.typeArguments[i] = from((ParameterizedType)array[i]);
